@@ -1,0 +1,33 @@
+.date-picker {
+  position: relative;
+}
+
+.date-modal {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background-color: rgb(232, 232, 232);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.date-modal .years,
+.date-modal .months,
+.date-modal .days {
+  padding: 3px 0;
+  width: 100%;
+  text-align: center;
+}
+
+.date-modal .days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.prev-btn,
+.next-btn {
+  border: none;
+  background: none;
+  margin: 0 15px;
+}
