@@ -1,0 +1,35 @@
+.stoybook-badge {
+  border-radius: 0.5em;
+  padding: 0.25em 0.75em;
+}
+
+.stoybook-badge--xs {
+  font-size: 12px;
+}
+
+.stoybook-badge--sm {
+  font-size: 14px;
+}
+
+.stoybook-badge--md {
+  font-size: 16px;
+}
+
+.stoybook-badge--lg {
+  font-size: 18px;
+}
+
+.stoybook-badge--gray {
+  background-color: #f4f4f5;
+  color: #27272a;
+}
+
+.stoybook-badge--red {
+  background-color: #ffbcbc;
+  color: #610000aa;
+}
+
+.stoybook-badge--green {
+  background-color: #d4ffc7;
+  color: #215b00;
+}
