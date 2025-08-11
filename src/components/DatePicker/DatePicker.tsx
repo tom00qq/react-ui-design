@@ -13,52 +13,64 @@ const DatePicker = () => {
     return new Date(year, monthIndex, 1).getDay();
   };
 
-  const getDayList = (year: number, month: number) => {
-    const monthIdex = month - 1;
-    const lastDate = new Date(year, monthIdex, 0).getDate();
+  const getLastDateOfMonth = (year: number, month: number) => {
+    return new Date(year, month, 0).getDate();
+  };
+
+  const getDateList = (year: number, month: number) => {
+    const lastDate = new Date(year, month, 0).getDate();
     return Array.from({ length: lastDate }, (_, i) => i + 1);
   };
 
-  const [date, setDate] = useState("");
-  const [show, setShow] = useState(false);
-
-  const [yearList] = useState<number[]>(() => {
+  const getYearList = (year: number) => {
     const years = [];
-    const startYear = currentYear - 100;
-    const endYear = currentYear + 10;
+    const startYear = year - 100;
+    const endYear = year + 10;
 
     for (let i = startYear; i <= endYear; i++) {
       years.push(i);
     }
 
     return years;
-  });
+  };
 
-  const monthList = Array.from({ length: 12 }, (_, i) => i + 1);
-  const [dayList, setDayList] = useState<number[]>(() =>
-    getDayList(currentYear, currentMonth)
-  );
+  const formatedDate = (date: Date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}/${mm}/${dd}`;
+  };
 
-  const [fillDayArray, setFillDayArray] = useState(
-    Array.from(
-      { length: getFirstDayOfMonth(currentYear, currentMonth) },
-      (_, i) => i + 1
-    )
-  );
+  const [dateValue, setDateValue] = useState(formatedDate(today));
+  const [show, setShow] = useState(false);
 
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedDate, setSelectedDate] = useState(currentDate);
 
+  const yearList = getYearList(selectedYear);
+  const monthList = Array.from({ length: 12 }, (_, i) => i + 1);
+  const dateList = getDateList(selectedYear, selectedMonth);
+  const filledDayList = Array.from(
+    { length: getFirstDayOfMonth(selectedYear, selectedMonth) },
+    (_, i) => i + 1
+  );
+
   useEffect(() => {
-    setDayList(getDayList(selectedYear, selectedMonth));
-    setFillDayArray(
-      Array.from(
-        { length: getFirstDayOfMonth(selectedYear, selectedMonth) },
-        (_, i) => i + 1
-      )
+    if (!dateList.includes(selectedDate)) {
+      setSelectedDate(getLastDateOfMonth(selectedYear, selectedMonth));
+    }
+  }, [selectedMonth]);
+
+  useEffect(() => {
+    if (!dateList.includes(selectedDate)) return;
+
+    const newDate = formatedDate(
+      new Date(selectedYear, selectedMonth - 1, selectedDate)
     );
-  }, [selectedYear, selectedMonth]);
+
+    setDateValue(newDate);
+  }, [selectedYear, selectedMonth, selectedDate]);
 
   return (
     <div className="date-picker">
@@ -66,7 +78,7 @@ const DatePicker = () => {
         type="text"
         id="date"
         readOnly
-        value={date}
+        value={dateValue}
         onFocus={() => setShow(true)}
         onBlur={() => setShow(true)}
       />
@@ -119,7 +131,7 @@ const DatePicker = () => {
               →
             </button>
           </div>
-          <div className="days">
+          <div className="dates">
             <span>日</span>
             <span>一</span>
             <span>二</span>
@@ -127,16 +139,17 @@ const DatePicker = () => {
             <span>四</span>
             <span>五</span>
             <span>六</span>
-            {fillDayArray.map((fillDay) => {
-              return <span key={fillDay}></span>;
+            {filledDayList.map((filledDay) => {
+              return <span key={filledDay}></span>;
             })}
-            {dayList.map((day) => {
+            {dateList.map((date) => {
               return (
                 <span
-                  key={day}
-                  className={day === selectedDate ? "selected" : ""}
+                  key={date}
+                  className={`date ${date === selectedDate ? "selected" : ""}`}
+                  onClick={() => setSelectedDate(date)}
                 >
-                  {day}
+                  {date}
                 </span>
               );
             })}
@@ -155,7 +168,8 @@ export default DatePicker;
 // 1. 年份資料來源，可以用 today 當年年份為基準點，往前、後推
 // 2. 元件生命週期
 // 3. Array.from
-// 4. getDaysOfMonth
+// 4. Js Date()
+// 5. 點擊區塊時，避免 blur 關閉 > year month 按鈕 > grid 垂直間距 > 參數參考 > 優化
 
 // 疑惑觀念
 // 1. useEffect 同樣依賴應該寫一起嗎？

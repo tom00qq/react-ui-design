@@ -12,13 +12,13 @@
 
 .date-modal .years,
 .date-modal .months,
-.date-modal .days {
+.date-modal .dates {
   padding: 3px 0;
   width: 100%;
   text-align: center;
 }
 
-.date-modal .days {
+.date-modal .dates {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
 }
@@ -31,5 +31,11 @@
 }
 
 .selected {
-  color: red;
+  background-color: rgb(188, 227, 255);
+  font-weight: bold;
+}
+
+.dates .date:hover {
+  cursor: pointer;
+  background-color: rgb(188, 227, 255);
 }
