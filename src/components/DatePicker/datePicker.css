@@ -30,6 +30,11 @@
   margin: 0 15px;
 }
 
+.prev-btn,
+.next-btn:hover {
+  cursor: pointer;
+}
+
 .selected {
   background-color: rgb(188, 227, 255);
   font-weight: bold;

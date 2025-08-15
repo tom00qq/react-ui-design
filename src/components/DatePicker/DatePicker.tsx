@@ -1,166 +1,149 @@
-import { useEffect, useState } from "react";
-
+import { useDatePicker } from "../../hooks/useDatePicker";
+import { forwardRef } from "react";
 import "./datePicker.css";
 
-const DatePicker = () => {
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth() + 1;
-  const currentDate = today.getDate();
+interface DatePickerProps {
+  value?: Date;
+  onChange?: (date: Date) => void;
+  defaultValue?: Date;
+  format?: (date: Date) => string;
+  minDate?: Date;
+  maxDate?: Date;
+}
 
-  const getFirstDayOfMonth = (year: number, month: number) => {
-    const monthIndex = month - 1;
-    return new Date(year, monthIndex, 1).getDay();
-  };
+export interface DatePickerRef {
+  getValue: () => Date;
+}
 
-  const getLastDateOfMonth = (year: number, month: number) => {
-    return new Date(year, month, 0).getDate();
-  };
+const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
+  ({ value, onChange, defaultValue, format, minDate, maxDate }, ref) => {
+    const {
+      dateModalRef,
+      dateValue,
+      show,
+      selectedYear,
+      selectedMonth,
+      selectedDate,
+      yearList,
+      monthList,
+      dateList,
+      filledDayList,
+      handlers,
+    } = useDatePicker(value, onChange, defaultValue, ref);
 
-  const getDateList = (year: number, month: number) => {
-    const lastDate = new Date(year, month, 0).getDate();
-    return Array.from({ length: lastDate }, (_, i) => i + 1);
-  };
+    return (
+      <div className="date-picker">
+        <input
+          type="text"
+          id="date"
+          readOnly
+          value={handlers.formatedDate(dateValue)}
+          onFocus={handlers.show}
+          onBlur={handlers.handleOnBlur}
+        />
+        {show ? (
+          <div
+            className="date-modal"
+            ref={dateModalRef}
+            tabIndex={-1}
+            onBlur={handlers.handleOnBlur}
+          >
+            <div className="years">
+              <button
+                type="button"
+                className="prev-btn"
+                onClick={handlers.prevYear}
+              >
+                ←
+              </button>
+              <select
+                className="yearList"
+                name="year"
+                id="year"
+                value={selectedYear}
+                onChange={(e) => {
+                  handlers.setSelectedYear(Number(e.target.value));
+                }}
+              >
+                {yearList.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
 
-  const getYearList = (year: number) => {
-    const years = [];
-    const startYear = year - 100;
-    const endYear = year + 10;
-
-    for (let i = startYear; i <= endYear; i++) {
-      years.push(i);
-    }
-
-    return years;
-  };
-
-  const formatedDate = (date: Date) => {
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    return `${yyyy}/${mm}/${dd}`;
-  };
-
-  const [dateValue, setDateValue] = useState(formatedDate(today));
-  const [show, setShow] = useState(false);
-
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-  const [selectedDate, setSelectedDate] = useState(currentDate);
-
-  const yearList = getYearList(selectedYear);
-  const monthList = Array.from({ length: 12 }, (_, i) => i + 1);
-  const dateList = getDateList(selectedYear, selectedMonth);
-  const filledDayList = Array.from(
-    { length: getFirstDayOfMonth(selectedYear, selectedMonth) },
-    (_, i) => i + 1
-  );
-
-  useEffect(() => {
-    if (!dateList.includes(selectedDate)) {
-      setSelectedDate(getLastDateOfMonth(selectedYear, selectedMonth));
-    }
-  }, [selectedMonth]);
-
-  useEffect(() => {
-    if (!dateList.includes(selectedDate)) return;
-
-    const newDate = formatedDate(
-      new Date(selectedYear, selectedMonth - 1, selectedDate)
+              <button
+                type="button"
+                className="next-btn"
+                onClick={handlers.nextYear}
+              >
+                →
+              </button>
+            </div>
+            <div className="months">
+              <button
+                type="button"
+                className="prev-btn"
+                onClick={handlers.prevMonth}
+              >
+                ←
+              </button>
+              <select
+                className="monthList"
+                name="month"
+                id="month"
+                value={selectedMonth}
+                onChange={(e) => {
+                  handlers.setSelectedMonth(Number(e.target.value));
+                }}
+              >
+                {monthList.map((month) => (
+                  <option key={month} value={month}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="next-btn"
+                onClick={handlers.nextMonth}
+              >
+                →
+              </button>
+            </div>
+            <div className="dates">
+              <span>日</span>
+              <span>一</span>
+              <span>二</span>
+              <span>三</span>
+              <span>四</span>
+              <span>五</span>
+              <span>六</span>
+              {filledDayList.map((filledDay) => {
+                return <span key={filledDay}></span>;
+              })}
+              {dateList.map((date) => {
+                return (
+                  <span
+                    key={date}
+                    className={`date ${
+                      date === selectedDate ? "selected" : ""
+                    }`}
+                    onClick={() => handlers.setSelectedDate(date)}
+                  >
+                    {date}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+      </div>
     );
-
-    setDateValue(newDate);
-  }, [selectedYear, selectedMonth, selectedDate]);
-
-  return (
-    <div className="date-picker">
-      <input
-        type="text"
-        id="date"
-        readOnly
-        value={dateValue}
-        onFocus={() => setShow(true)}
-        onBlur={() => setShow(true)}
-      />
-      {show ? (
-        <div className="date-modal">
-          <div className="years">
-            <button type="button" className="prev-btn">
-              ←
-            </button>
-            <select
-              className="yearList"
-              name="year"
-              id="year"
-              value={selectedYear}
-              onChange={(e) => {
-                setSelectedYear(Number(e.target.value));
-              }}
-            >
-              {yearList.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-
-            <button type="button" className="next-btn">
-              →
-            </button>
-          </div>
-          <div className="months">
-            <button type="button" className="prev-btn">
-              ←
-            </button>
-            <select
-              className="monthList"
-              name="month"
-              id="month"
-              value={selectedMonth}
-              onChange={(e) => {
-                setSelectedMonth(Number(e.target.value));
-              }}
-            >
-              {monthList.map((month) => (
-                <option key={month} value={month}>
-                  {month}
-                </option>
-              ))}
-            </select>
-            <button type="button" className="next-btn">
-              →
-            </button>
-          </div>
-          <div className="dates">
-            <span>日</span>
-            <span>一</span>
-            <span>二</span>
-            <span>三</span>
-            <span>四</span>
-            <span>五</span>
-            <span>六</span>
-            {filledDayList.map((filledDay) => {
-              return <span key={filledDay}></span>;
-            })}
-            {dateList.map((date) => {
-              return (
-                <span
-                  key={date}
-                  className={`date ${date === selectedDate ? "selected" : ""}`}
-                  onClick={() => setSelectedDate(date)}
-                >
-                  {date}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-        <></>
-      )}
-    </div>
-  );
-};
+  }
+);
 
 export default DatePicker;
 
@@ -169,9 +152,17 @@ export default DatePicker;
 // 2. 元件生命週期
 // 3. Array.from
 // 4. Js Date()
-// 5. 點擊區塊時，避免 blur 關閉 > year month 按鈕 > grid 垂直間距 > 參數參考 > 優化
+// 5. tabIndex 讓 <div>、<span> 可以 focus
+// 6. e.relatedTarget 指出即將被 focus 的元素
+// 7. 參數參考 > 優化
+// - Hooks / Container-Presentation
+// - API props：UnControlled / Controlled Component
+// - Date type / story description / param check and warn / uncotrolled 取值
+// - ref 機制 / format / min / max / render props 自訂樣式
 
 // 疑惑觀念
 // 1. useEffect 同樣依賴應該寫一起嗎？
 //    useEffect 即便相同依賴，但關注點不同就應該分離，寫複數個
 // 2. setState 批次更新、updater func、re-render
+
+// https://www.patterns.dev/react/presentational-container-pattern/
